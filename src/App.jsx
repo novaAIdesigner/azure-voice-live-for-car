@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Settings, Gauge, Play, Square, ChevronDown, ChevronUp, Radio, Navigation } from 'lucide-react';
+import { Mic, MicOff, Settings, Gauge, Play, Square, ChevronDown, ChevronUp, Radio, Navigation, Thermometer } from 'lucide-react';
 import { RealtimeClient } from './services/realtimeService';
 import { carTools, executeCarTool } from './tools/carTools';
 import { calculateEPASpeed, calculateBatteryConsumption, EPA_CYCLE_DURATION } from './utils/epaSimulator';
@@ -166,6 +166,11 @@ function App() {
         const consumption = calculateBatteryConsumption(newSpeed);
         const newBattery = Math.max(0, prev.battery - consumption);
         const newRange = Math.round(newBattery * 3.1); // ~310 km at 100%
+
+        // Debug log to verify speed updates
+        if (Math.floor(time) % 5 === 0) { // Log every 5 seconds
+          console.log(`[EPA Simulator] Speed: ${newSpeed} km/h, Battery: ${newBattery.toFixed(2)}%, Range: ${newRange} km`);
+        }
 
         return {
           ...prev,
@@ -760,6 +765,35 @@ function App() {
                   </div>
                 </div>
 
+                {/* Climate Control */}
+                <div className="bg-gray-700 p-3 rounded border border-gray-600">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Thermometer size={14} className="text-orange-400" />
+                    <span className="text-xs text-gray-400 font-semibold">CLIMATE</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-400">Temperature</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCarStatus({...carStatus, temperature: Math.max(16, carStatus.temperature - 1)})}
+                        className="bg-gray-600 hover:bg-gray-500 text-white rounded px-2 py-1 text-xs"
+                      >
+                        −
+                      </button>
+                      <span className="text-white font-semibold text-sm min-w-[3rem] text-center">
+                        {carStatus.temperature}°C
+                      </span>
+                      <button
+                        onClick={() => setCarStatus({...carStatus, temperature: Math.min(30, carStatus.temperature + 1)})}
+                        className="bg-gray-600 hover:bg-gray-500 text-white rounded px-2 py-1 text-xs"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Media Player */}
                 <div className="bg-gray-700 p-3 rounded border border-gray-600">
                   <div className="flex items-center gap-2 mb-2">
@@ -830,9 +864,9 @@ function App() {
           {/* RIGHT PANEL: Chat/Voice Interface */}
           <div className="lg:col-span-3 flex flex-col gap-6 h-full">
             {/* Chat Panel - Flexible height */}
-            <div className="bg-gray-800 rounded-lg border border-gray-700 flex flex-col" style={{ height: 'calc(100vh - 575px)', minHeight: '400px' }}>
+            <div className="bg-gray-800 rounded-lg border border-gray-700 flex flex-col" style={{ height: 'calc(100vh - 480px)', minHeight: '400px' }}>
               {/* Chat/Logs Area */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-1" style={{ maxHeight: '100%' }}>
+              <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-1" style={{ maxHeight: '100%' }}>
                 {logs.length === 0 && (
                   <div className="text-center text-gray-500 py-8">
                     <p className="text-sm">No messages yet</p>
@@ -840,7 +874,7 @@ function App() {
                   </div>
                 )}
                 {logs.map((log, i) => (
-                  <div key={i} className={`text-xs px-2 py-1 rounded flex items-start gap-2 ${
+                  <div key={i} className={`text-xs px-2 py-1 rounded flex items-start gap-2 break-words ${
                     log.type === 'user' ? 'bg-blue-900/30 border-l-2 border-blue-500' :
                     log.type === 'assistant' ? 'bg-green-900/30 border-l-2 border-green-500' :
                     log.type === 'tool' ? 'bg-yellow-900/30 border-l-2 border-yellow-500' :
@@ -848,7 +882,7 @@ function App() {
                     'bg-gray-800/30'
                   }`}>
                     <span className="text-gray-500 shrink-0">[{log.time}]</span>
-                    <span className={`flex-1 ${
+                    <span className={`flex-1 break-words ${
                       log.type === 'user' ? 'text-blue-300' :
                       log.type === 'assistant' ? 'text-green-300' :
                       log.type === 'tool' ? 'text-yellow-300' :
