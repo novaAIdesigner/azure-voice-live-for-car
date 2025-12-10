@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Settings, Gauge, Play, Square, ChevronDown, ChevronUp, Radio, Navigation, Thermometer } from 'lucide-react';
+import { Mic, MicOff, Settings, Gauge, Play, Square, ChevronDown, ChevronUp, Radio, Navigation, Thermometer, RotateCcw } from 'lucide-react';
 import { RealtimeClient } from './services/realtimeService';
 import { carTools, executeCarTool } from './tools/carTools';
 import { calculateEPASpeed, calculateBatteryConsumption, EPA_CYCLE_DURATION } from './utils/epaSimulator';
@@ -497,6 +497,41 @@ function App() {
     }
   };
 
+  const handleReset = () => {
+    // Disconnect if connected
+    if (isConnected) {
+      stopRecording();
+      clearAudioQueue();
+      clientRef.current?.disconnect();
+      setIsConnected(false);
+    }
+    
+    // Clear logs
+    setLogs([]);
+    
+    // Reset metrics
+    setMetrics({
+      tokens: {
+        input_text: 0,
+        input_audio: 0,
+        output_text: 0,
+        output_audio: 0,
+        cached_text: 0,
+        cached_audio: 0
+      },
+      latency: {
+        values: [],
+        min: 0,
+        avg: 0,
+        max: 0,
+        p90: 0
+      },
+      turns: 0
+    });
+    
+    addLog('🔄 Reset complete');
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
@@ -533,10 +568,20 @@ function App() {
                     onChange={e => {
                       const category = e.target.value;
                       let defaultModel = '';
-                      if (category === 'LLM Realtime') defaultModel = 'gpt-realtime';
-                      else if (category === 'LLM+TTS') defaultModel = 'gpt-realtime';
-                      else if (category === 'ASR+LLM+TTS') defaultModel = 'gpt-4o';
-                      const newSessionConfig = {...config.sessionConfig, model: defaultModel};
+                      let defaultVoice = '';
+                      
+                      if (category === 'LLM Realtime') {
+                        defaultModel = 'gpt-realtime';
+                        defaultVoice = 'alloy'; // OpenAI voice for LLM Realtime
+                      } else if (category === 'LLM+TTS') {
+                        defaultModel = 'gpt-realtime';
+                        defaultVoice = 'en-US-AvaMultilingualNeural'; // Azure voice for LLM+TTS
+                      } else if (category === 'ASR+LLM+TTS') {
+                        defaultModel = 'gpt-4o';
+                        defaultVoice = 'en-US-AvaMultilingualNeural'; // Azure voice for ASR+LLM+TTS
+                      }
+                      
+                      const newSessionConfig = {...config.sessionConfig, model: defaultModel, voice: defaultVoice};
                       setConfig({...config, modelCategory: category, model: defaultModel, sessionConfig: newSessionConfig});
                       setSessionConfigJson(JSON.stringify(newSessionConfig, null, 2));
                     }}
@@ -616,12 +661,12 @@ function App() {
                       </>
                     ) : (
                       <>
-                        <option value="en-US-AvaNeural">Ava (Female, conversational)</option>
+                        <option value="en-US-AvaMultilingualNeural">Ava (Female, conversational)</option>
                         <option value="en-US-Ava:DragonHDLatestNeural">Ava HD (Female, friendly)</option>
-                        <option value="en-US-AndrewNeural">Andrew (Male, conversational)</option>
-                        <option value="en-US-GuyNeural">Guy (Male, professional)</option>
-                        <option value="en-US-AriaNeural">Aria (Female, cheerful)</option>
-                        <option value="en-US-DavisNeural">Davis (Male, calm)</option>
+                        <option value="en-US-AndrewMultilingualNeural">Andrew (Male, conversational)</option>
+                        <option value="en-US-GuyMultilingualNeural">Guy (Male, professional)</option>
+                        <option value="zh-CN-XiaochenMultilingualNeural">Xiaochen (Female, assistant)</option>
+                        <option value="en-US-AndrewMultilingualNeural">Andrew (Male, calm)</option>
                       </>
                     )}
                   </select>
@@ -724,13 +769,23 @@ function App() {
                   </div>
                 )}
 
-                {/* Connect Button */}
-                <button 
-                  onClick={handleConnect}
-                  className={`w-full py-2 rounded font-semibold flex justify-center items-center gap-2 text-sm transition ${isConnected ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
-                >
-                  {isConnected ? <><Square size={16} /> Disconnect</> : <><Play size={16} /> Connect</>}
-                </button>
+                {/* Connect and Reset Buttons */}
+                <div className="flex gap-2">
+                  <button 
+                    onClick={handleConnect}
+                    className={`flex-1 py-2 rounded font-semibold flex justify-center items-center gap-2 text-sm transition ${isConnected ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                  >
+                    {isConnected ? <><Square size={16} /> Disconnect</> : <><Play size={16} /> Connect</>}
+                  </button>
+                  
+                  <button 
+                    onClick={handleReset}
+                    className="px-3 py-2 rounded font-semibold flex justify-center items-center transition bg-gray-600 hover:bg-gray-500"
+                    title="Reset chat and statistics"
+                  >
+                    <RotateCcw size={16} />
+                  </button>
+                </div>
               </div>
             </div>
 
