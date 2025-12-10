@@ -5,6 +5,19 @@ import { carTools, executeCarTool } from './tools/carTools';
 import { calculateEPASpeed, calculateBatteryConsumption, EPA_CYCLE_DURATION } from './utils/epaSimulator';
 
 function App() {
+  // Cookie utility functions
+  const setCookie = (name, value, days = 365) => {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+  };
+
+  const getCookie = (name) => {
+    return document.cookie.split('; ').reduce((r, v) => {
+      const parts = v.split('=');
+      return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+    }, '');
+  };
+
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -50,13 +63,17 @@ function App() {
     navigationDistance: '—'
   });
   
-  const [config, setConfig] = useState({
-    endpoint: '',
-    apiKey: '',
-    apiVersion: '2025-10-01',
-    modelCategory: 'LLM Realtime',
-    model: 'gpt-4o-realtime-preview',
-    sessionConfig: JSON.parse(sessionConfigJson)
+  const [config, setConfig] = useState(() => {
+    const savedEndpoint = getCookie('azure_endpoint');
+    const savedApiKey = getCookie('azure_apiKey');
+    return {
+      endpoint: savedEndpoint || '',
+      apiKey: savedApiKey || '',
+      apiVersion: '2025-10-01',
+      modelCategory: 'LLM Realtime',
+      model: 'gpt-4o-realtime-preview',
+      sessionConfig: JSON.parse(sessionConfigJson)
+    };
   });
 
   const [metrics, setMetrics] = useState({
@@ -79,6 +96,16 @@ function App() {
   });
 
   const clientRef = useRef(null);
+
+  // Save endpoint and apiKey to cookies when they change
+  useEffect(() => {
+    if (config.endpoint) {
+      setCookie('azure_endpoint', config.endpoint);
+    }
+    if (config.apiKey) {
+      setCookie('azure_apiKey', config.apiKey);
+    }
+  }, [config.endpoint, config.apiKey]);
 
   // EPA Cycle Simulation for BEV
   useEffect(() => {
