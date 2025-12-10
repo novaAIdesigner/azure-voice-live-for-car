@@ -25,7 +25,7 @@ function App() {
   const [sessionConfigJson, setSessionConfigJson] = useState(JSON.stringify({
     modalities: ["text", "audio"],
     instructions: "You are a helpful car assistant. Help the user with their vehicle.",
-    voice: "en-US-Ava:DragonHDLatestNeural",
+    voice: "en-US-AvaNeural",
     input_audio_format: "pcm16",
     output_audio_format: "pcm16",
     turn_detection: {
@@ -323,9 +323,12 @@ function App() {
                       </>
                     ) : (
                       <>
-                        <option value="en-US-Ava:DragonHDLatestNeural">Ava (HD)</option>
-                        <option value="en-US-Guy:DragonHDLatestNeural">Guy (HD)</option>
-                        <option value="en-US-AmberNeural">Amber(Nerual)</option>
+                        <option value="en-US-Ava:DragonHDLatestNeural">Ava HD (Female, friendly)</option>
+                        <option value="en-US-AvaNeural">Ava (Female, conversational)</option>
+                        <option value="en-US-AndrewNeural">Andrew (Male, conversational)</option>
+                        <option value="en-US-GuyNeural">Guy (Male, professional)</option>
+                        <option value="en-US-AriaNeural">Aria (Female, cheerful)</option>
+                        <option value="en-US-DavisNeural">Davis (Male, calm)</option>
                         <option value="alloy">Alloy (OpenAI)</option>
                         <option value="echo">Echo (OpenAI)</option>
                         <option value="fable">Fable (OpenAI)</option>
