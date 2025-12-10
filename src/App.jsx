@@ -44,7 +44,7 @@ function App() {
     input_audio_transcription: {
       model: "whisper-1"
     },
-    tools: []
+    tools: carTools
   }, null, 2));
 
   const [carStatus, setCarStatus] = useState({
@@ -67,13 +67,36 @@ function App() {
   const [config, setConfig] = useState(() => {
     const savedEndpoint = getCookie('azure_endpoint');
     const savedApiKey = getCookie('azure_apiKey');
+    const initialSessionConfig = {
+      modalities: ["text", "audio"],
+      instructions: "You are a helpful car assistant, use simple and short oral response.",
+      voice: "alloy",
+      input_audio_format: "pcm16",
+      output_audio_format: "pcm16",
+      turn_detection: {
+        type: "server_vad",
+        threshold: 0.5,
+        prefix_padding_ms: 300,
+        silence_duration_ms: 500
+      },
+      input_audio_echo_cancellation: {
+        type: "server_echo_cancellation"
+      },
+      input_audio_noise_reduction: {
+        type: "azure_deep_noise_suppression"
+      },
+      input_audio_transcription: {
+        model: "whisper-1"
+      },
+      tools: carTools
+    };
     return {
       endpoint: savedEndpoint || '',
       apiKey: savedApiKey || '',
       apiVersion: '2025-10-01',
       modelCategory: 'LLM Realtime',
       model: 'gpt-4o-realtime-preview',
-      sessionConfig: JSON.parse(sessionConfigJson)
+      sessionConfig: initialSessionConfig
     };
   });
 
@@ -117,6 +140,11 @@ function App() {
       setCookie('azure_apiKey', config.apiKey);
     }
   }, [config.endpoint, config.apiKey]);
+
+  // Sync sessionConfigJson with sessionConfig
+  useEffect(() => {
+    setSessionConfigJson(JSON.stringify(config.sessionConfig, null, 2));
+  }, [config.sessionConfig]);
 
   // Auto-scroll to bottom when new logs arrive
   useEffect(() => {
@@ -414,7 +442,7 @@ function App() {
         if (event.type === 'response.function_call_arguments.done') {
           const { name, arguments: args, call_id } = event;
           addLog(`🔧 Executing: ${name}(${args})`, 'tool');
-          const result = await executeCarTool(name, JSON.parse(args), setCarStatus);
+          const result = await executeCarTool(name, JSON.parse(args), setCarStatus, carStatus);
           addLog(`✅ Result: ${JSON.stringify(result)}`, 'tool');
           clientRef.current.sendToolOutput(call_id, result);
         }
