@@ -1,7 +1,7 @@
 import React from 'react';
 import { BarChart3 } from 'lucide-react';
 
-export default function Statistics({ metrics }) {
+export default function Statistics({ metrics, config }) {
   const textCacheRate = metrics.tokens.input_text > 0 
     ? ((metrics.tokens.cached_text / metrics.tokens.input_text) * 100).toFixed(1)
     : '0.0';
@@ -10,15 +10,33 @@ export default function Statistics({ metrics }) {
     ? ((metrics.tokens.cached_audio / metrics.tokens.input_audio) * 100).toFixed(1)
     : '0.0';
 
+  // Convert audio tokens to seconds
+  // Input: 1 token = 0.1 seconds (token / 10)
+  // Output: 1 token = 0.05 seconds (token / 20)
+  const inputAudioSec = (metrics.tokens.input_audio / 10).toFixed(2);
+  const outputAudioSec = (metrics.tokens.output_audio / 20).toFixed(2);
+
   const exportToCalculator = () => {
+    const turns = metrics.turns || 1;
+    
+    // Calculate averages per turn
+    const avgInputText = turns > 0 ? Math.round(metrics.tokens.input_text / turns) : 0;
+    const avgOutputText = turns > 0 ? Math.round(metrics.tokens.output_text / turns) : 0;
+    const avgInputAudioSec = turns > 0 ? ((metrics.tokens.input_audio / 10) / turns).toFixed(2) : '0';
+    const avgOutputAudioSec = turns > 0 ? ((metrics.tokens.output_audio / 20) / turns).toFixed(2) : '0';
+    
     const baseUrl = 'https://novaaidesigner.github.io/azure-voice-live-calculator/';
     const params = new URLSearchParams({
-      input_text_tokens: metrics.tokens.input_text,
-      input_audio_tokens: metrics.tokens.input_audio,
-      output_text_tokens: metrics.tokens.output_text,
-      output_audio_tokens: metrics.tokens.output_audio,
-      text_cache_rate: textCacheRate,
-      audio_cache_rate: audioCacheRate
+      dau: '1000',
+      turns: turns.toString(),
+      inputAudio: avgInputAudioSec,
+      outputAudio: avgOutputAudioSec,
+      inputText: avgInputText.toString(),
+      model: config.model,
+      avatar: 'none',
+      textCache: textCacheRate,
+      audioCache: audioCacheRate,
+      tts: 'openai-realtime'
     });
     window.open(`${baseUrl}?${params.toString()}`, '_blank');
   };
@@ -40,14 +58,11 @@ export default function Statistics({ metrics }) {
       {/* Token Usage */}
       <div className="mb-4">
         <h4 className="text-xs text-gray-400 mb-2 font-semibold">Token Usage</h4>
-        <div className="grid grid-cols-3 gap-2 text-xs">
+        {/* Text Row */}
+        <div className="grid grid-cols-3 gap-2 text-xs mb-2">
           <div className="bg-gray-700 p-2 rounded">
             <div className="text-gray-400">Input Text</div>
-            <div className="text-white font-semibold">{metrics.tokens.input_text}</div>
-          </div>
-          <div className="bg-gray-700 p-2 rounded">
-            <div className="text-gray-400">Input Audio</div>
-            <div className="text-white font-semibold">{metrics.tokens.input_audio}</div>
+            <div className="text-white font-semibold">{metrics.tokens.input_text} token</div>
           </div>
           <div className="bg-gray-700 p-2 rounded">
             <div className="text-gray-400">Text Cache Rate</div>
@@ -55,15 +70,22 @@ export default function Statistics({ metrics }) {
           </div>
           <div className="bg-gray-700 p-2 rounded">
             <div className="text-gray-400">Output Text</div>
-            <div className="text-white font-semibold">{metrics.tokens.output_text}</div>
+            <div className="text-white font-semibold">{metrics.tokens.output_text} token</div>
           </div>
+        </div>
+        {/* Audio Row */}
+        <div className="grid grid-cols-3 gap-2 text-xs">
           <div className="bg-gray-700 p-2 rounded">
-            <div className="text-gray-400">Output Audio</div>
-            <div className="text-white font-semibold">{metrics.tokens.output_audio}</div>
+            <div className="text-gray-400">Input Audio</div>
+            <div className="text-white font-semibold">{metrics.tokens.input_audio} token ({inputAudioSec} sec)</div>
           </div>
           <div className="bg-gray-700 p-2 rounded">
             <div className="text-gray-400">Audio Cache Rate</div>
             <div className="text-orange-400 font-semibold">{audioCacheRate}%</div>
+          </div>
+          <div className="bg-gray-700 p-2 rounded">
+            <div className="text-gray-400">Output Audio</div>
+            <div className="text-white font-semibold">{metrics.tokens.output_audio} token ({outputAudioSec} sec)</div>
           </div>
         </div>
       </div>

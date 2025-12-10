@@ -168,7 +168,7 @@ function App() {
         const newRange = Math.round(newBattery * 3.1); // ~310 km at 100%
 
         // Debug log to verify speed updates
-        if (Math.floor(time) % 5 === 0) { // Log every 5 seconds
+        if (Math.floor(time) % 10 === 0) { // Log every 5 seconds
           console.log(`[EPA Simulator] Speed: ${newSpeed} km/h, Battery: ${newBattery.toFixed(2)}%, Range: ${newRange} km`);
         }
 
@@ -179,7 +179,7 @@ function App() {
           batteryRange: newRange
         };
       });
-    }, 500); // Update every 500ms
+    }, 1000); // Update every 1 second
 
     return () => clearInterval(epaInterval);
   }, []);
@@ -456,7 +456,11 @@ function App() {
         if (event.type === 'response.done') {
           if (event.response && event.response.usage) {
             const usage = event.response.usage;
-            const inputText = usage.input_token_details?.text_tokens || 0;
+            
+            // Log the raw usage JSON
+            console.log('Usage:', JSON.stringify(usage, null, 2));
+            
+            const inputText = usage.input_tokens || 0;
             const inputAudio = usage.input_token_details?.audio_tokens || 0;
             const outputText = usage.output_token_details?.text_tokens || 0;
             const outputAudio = usage.output_token_details?.audio_tokens || 0;
@@ -911,7 +915,7 @@ function App() {
             </div>
 
             {/* Token Usage Panel - Below Chat */}
-            <Statistics metrics={metrics} />
+            <Statistics metrics={metrics} config={config} />
           </div>
         </div>
       </div>
