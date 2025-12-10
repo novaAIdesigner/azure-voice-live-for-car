@@ -95,7 +95,7 @@ function App() {
       apiKey: savedApiKey || '',
       apiVersion: '2025-10-01',
       modelCategory: 'LLM Realtime',
-      model: 'gpt-4o-realtime-preview',
+      model: 'gpt-realtime',
       sessionConfig: initialSessionConfig
     };
   });
@@ -533,8 +533,8 @@ function App() {
                     onChange={e => {
                       const category = e.target.value;
                       let defaultModel = '';
-                      if (category === 'LLM Realtime') defaultModel = 'gpt-4o-realtime-preview';
-                      else if (category === 'LLM+TTS') defaultModel = 'gpt-4o-realtime-preview';
+                      if (category === 'LLM Realtime') defaultModel = 'gpt-realtime';
+                      else if (category === 'LLM+TTS') defaultModel = 'gpt-realtime';
                       else if (category === 'ASR+LLM+TTS') defaultModel = 'gpt-4o';
                       const newSessionConfig = {...config.sessionConfig, model: defaultModel};
                       setConfig({...config, modelCategory: category, model: defaultModel, sessionConfig: newSessionConfig});
@@ -565,26 +565,29 @@ function App() {
                   >
                     {config.modelCategory === 'LLM Realtime' && (
                       <>
-                        <option value="gpt-4o-realtime-preview">gpt-4o-realtime</option>
-                        <option value="gpt-4o-mini-realtime-preview">gpt-4o-mini-realtime</option>
+                        <option value="gpt-realtime">gpt-realtime</option>
+                        <option value="gpt-realtime-mini">gpt-realtime-mini</option>
+                        <option value="phi4-mm-realtime">phi4-mm-realtime</option>
                       </>
                     )}
                     {config.modelCategory === 'LLM+TTS' && (
                       <>
-                        <option value="gpt-4o-realtime-preview">gpt-4o-realtime</option>
-                        <option value="gpt-4o-mini-realtime-preview">gpt-4o-mini-realtime</option>
-                        <option value="phi-4-multimodal">phi-4 multimodal (5.6B for device)</option>
+                        <option value="gpt-realtime">gpt-realtime</option>
+                        <option value="gpt-realtime-mini">gpt-realtime-mini</option>
+                        <option value="phi4-mm-realtime">phi4-mm-realtime</option>
                       </>
                     )}
                     {config.modelCategory === 'ASR+LLM+TTS' && (
                       <>
                         <option value="gpt-4o">gpt-4o</option>
-                        <option value="gpt-4.1">gpt-4.1</option>
-                        <option value="gpt-4.5">gpt-4.5</option>
                         <option value="gpt-4o-mini">gpt-4o-mini</option>
+                        <option value="gpt-4.1">gpt-4.1</option>
                         <option value="gpt-4.1-mini">gpt-4.1-mini</option>
-                        <option value="gpt-4.1-nano">gpt-4.1-nano</option>
-                        <option value="phi-4">phi-4 (14B)</option>
+                        <option value="gpt-5">gpt-5</option>
+                        <option value="gpt-5-mini">gpt-5-mini</option>
+                        <option value="gpt-5-nano">gpt-5-nano</option>
+                        <option value="gpt-5-chat">gpt-5-chat</option>
+                        <option value="phi4-mini">phi4-mini</option>
                       </>
                     )}
                   </select>
