@@ -567,7 +567,6 @@ function App() {
                       <>
                         <option value="gpt-realtime">gpt-realtime</option>
                         <option value="gpt-realtime-mini">gpt-realtime-mini</option>
-                        <option value="phi4-mm-realtime">phi4-mm-realtime</option>
                       </>
                     )}
                     {config.modelCategory === 'LLM+TTS' && (

@@ -87,11 +87,32 @@ export class RealtimeClient {
 
     this.ws.onopen = () => {
       this.emit('open');
+      
+      // Format voice configuration based on voice type
+      const openAIVoices = ['alloy', 'echo', 'fable', 'nova', 'shimmer'];
+      const voiceValue = sessionConfig.voice;
+      let formattedVoice;
+      
+      if (openAIVoices.includes(voiceValue)) {
+        // OpenAI voice - use object format with type
+        formattedVoice = {
+          name: voiceValue,
+          type: "openai"
+        };
+      } else {
+        // Azure voice - use object format with type azure
+        formattedVoice = {
+          name: voiceValue,
+          type: "azure-standard"
+        };
+      }
+      
       // Send initial configuration
       this.send({
         type: "session.update",
         session: {
           ...sessionConfig,
+          voice: formattedVoice,
           input_audio_format: "pcm16",
           output_audio_format: "pcm16",
         }
