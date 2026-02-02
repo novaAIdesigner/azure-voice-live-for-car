@@ -662,7 +662,7 @@ function App() {
                     ) : (
                       <>
                         <option value="en-US-Ava:DragonHDLatestNeural">Ava HD (Female, friendly)</option>
-                        <option value="ja-JP-Nanami:DragonHDLatestNeural">Nanami HD (Japanese, female)</option>
+                        <option value="ja-JP-Nanami:DragonHDLatestNeural">Nanami HD (Female, polite)</option>
                         <option value="zh-CN-Xiaoxiao:DragonHDFlashLatestNeural">Xiaoxiao HD (Female, warm)</option>
                         <option value="en-US-AvaMultilingualNeural">Ava (Female, conversational)</option>
                         <option value="en-US-AndrewMultilingualNeural">Andrew (Male, conversational)</option>
