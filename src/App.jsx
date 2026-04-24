@@ -22,6 +22,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [logs, setLogs] = useState([]);
+  const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(true);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [sessionConfigJson, setSessionConfigJson] = useState(JSON.stringify({
     modalities: ["text", "audio"],
@@ -150,6 +151,10 @@ function App() {
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
+
+  useEffect(() => {
+    setIsConfigPanelOpen(!isConnected);
+  }, [isConnected]);
 
   // EPA Cycle Simulation for BEV
   useEffect(() => {
@@ -555,11 +560,19 @@ function App() {
           <div className="lg:col-span-1 space-y-6">
             {/* Configuration Panel */}
             <div className="bg-gray-800 p-5 rounded-lg border border-gray-700">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Settings size={18} /> Configuration
-              </h2>
+              <button
+                type="button"
+                onClick={() => setIsConfigPanelOpen(prev => !prev)}
+                className="w-full text-left text-lg font-semibold mb-4 flex items-center justify-between gap-2"
+              >
+                <span className="flex items-center gap-2">
+                  <Settings size={18} /> Configuration
+                </span>
+                {isConfigPanelOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </button>
               
-              <div className="space-y-4">
+              {isConfigPanelOpen && (
+                <div className="space-y-4 mb-4">
                 {/* Model Architecture */}
                 <div>
                   <label className="block text-xs text-gray-400 mb-1 font-semibold">Model Architecture</label>
@@ -771,23 +784,24 @@ function App() {
                   </div>
                 )}
 
-                {/* Connect and Reset Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={handleConnect}
-                    className={`flex-1 py-2 rounded font-semibold flex justify-center items-center gap-2 text-sm transition ${isConnected ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
-                  >
-                    {isConnected ? <><Square size={16} /> Disconnect</> : <><Play size={16} /> Connect</>}
-                  </button>
-                  
-                  <button 
-                    onClick={handleReset}
-                    className="px-3 py-2 rounded font-semibold flex justify-center items-center transition bg-gray-600 hover:bg-gray-500"
-                    title="Reset chat and statistics"
-                  >
-                    <RotateCcw size={16} />
-                  </button>
                 </div>
+              )}
+
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleConnect}
+                  className={`flex-1 py-2 rounded font-semibold flex justify-center items-center gap-2 text-sm transition ${isConnected ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                >
+                  {isConnected ? <><Square size={16} /> Disconnect</> : <><Play size={16} /> Connect</>}
+                </button>
+                
+                <button 
+                  onClick={handleReset}
+                  className="px-3 py-2 rounded font-semibold flex justify-center items-center transition bg-gray-600 hover:bg-gray-500"
+                  title="Reset chat and statistics"
+                >
+                  <RotateCcw size={16} />
+                </button>
               </div>
             </div>
 
